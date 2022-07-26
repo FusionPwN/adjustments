@@ -48,17 +48,6 @@ class ArrayAdjustmentCollection implements AdjustmentCollectionContract
         return $result;
     }
 
-	public function quantity(): float
-	{
-		$result = 0;
-
-		foreach ($this->items as $adjustment) {
-			$result += $adjustment->getData('quantity') ?? 0;
-		}
-
-		return $result;
-	}
-
     public function isEmpty(): bool
     {
         return empty($this->items);
