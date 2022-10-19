@@ -20,6 +20,7 @@ use Vanilo\Adjustments\Contracts\Adjustment;
 use Vanilo\Adjustments\Models\AdjustmentProxy;
 use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
+use Vanilo\Adjustments\Support\IsAShippingAdjusment;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
 
@@ -28,6 +29,7 @@ final class SimpleShippingFee implements Adjuster
     use HasWriteableTitleAndDescription;
     use IsLockable;
     use IsNotIncluded;
+	use IsAShippingAdjusment;
 
     private float $amount;
 
@@ -63,8 +65,11 @@ final class SimpleShippingFee implements Adjuster
     private function calculateAmount(Adjustable $adjustable): float
     {
         if (null !== $this->freeThreshold && $adjustable->itemsTotal() >= $this->freeThreshold) {
+			debug("Adding shipping free --- Cart total [" . $adjustable->itemsTotal() . "] --- Threshold [$this->freeThreshold] --- Final applied value [0]");
             return 0;
         }
+
+		debug("Adding shipping free --- Cart total [" . $adjustable->itemsTotal() . "] --- Threshold [$this->freeThreshold] --- Final applied value [$this->amount]");
 
         return $this->amount;
     }
@@ -72,15 +77,17 @@ final class SimpleShippingFee implements Adjuster
     private function getModelAttributes(Adjustable $adjustable): array
     {
         return [
-            'type' => AdjustmentTypeProxy::SHIPPING(),
-            'adjuster' => self::class,
-            'origin' => null,
-            'title' => $this->getTitle(),
-            'description' => $this->getDescription(),
-            'data' => ['amount' => $this->amount, 'freeThreshold' => $this->freeThreshold],
-            'amount' => $this->calculateAmount($adjustable),
-            'is_locked' => $this->isLocked(),
-            'is_included' => $this->isIncluded(),
+            'type' 				=> AdjustmentTypeProxy::SHIPPING(),
+			'adjustable_type' 	=> $adjustable->getMorphClass(),
+			'adjustable_id' 	=> $adjustable->id,
+            'adjuster' 			=> self::class,
+            'origin' 			=> null,
+            'title' 			=> $this->getTitle(),
+            'description' 		=> $this->getDescription(),
+            'data' 				=> ['amount' => $this->amount, 'freeThreshold' => $this->freeThreshold],
+            'amount' 			=> $this->calculateAmount($adjustable),
+            'is_locked' 		=> $this->isLocked(),
+            'is_included' 		=> $this->isIncluded(),
         ];
     }
 }
