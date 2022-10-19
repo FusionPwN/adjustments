@@ -17,7 +17,7 @@ namespace Vanilo\Adjustments\Adjusters;
 use App\Classes\Utilities;
 use App\Models\Admin\Discount;
 use App\Models\Admin\Product;
-use App\Models\Cart;
+use Vanilo\Cart\Models\Cart;
 use Vanilo\Adjustments\Contracts\Adjustable;
 use Vanilo\Adjustments\Contracts\Adjuster;
 use Vanilo\Adjustments\Contracts\Adjustment;

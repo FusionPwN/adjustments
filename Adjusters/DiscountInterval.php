@@ -16,8 +16,8 @@ namespace Vanilo\Adjustments\Adjusters;
 
 use App\Classes\Utilities;
 use App\Models\Admin\ProductIntervalPrice;
-use App\Models\Cart;
-use App\Models\CartItem;
+use Vanilo\Cart\Models\Cart;
+use Vanilo\Cart\Models\CartItem;
 use Vanilo\Adjustments\Contracts\Adjustable;
 use Vanilo\Adjustments\Contracts\Adjuster;
 use Vanilo\Adjustments\Contracts\Adjustment;
