@@ -2,16 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * Contains the SimpleShippingFee class.
- *
- * @copyright   Copyright (c) 2021 Attila Fulop
- * @author      Attila Fulop
- * @license     MIT
- * @since       2021-05-28
- *
- */
-
 namespace Vanilo\Adjustments\Adjusters;
 
 use Vanilo\Adjustments\Contracts\Adjustable;

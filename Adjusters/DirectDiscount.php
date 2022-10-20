@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vanilo\Adjustments\Adjusters;
 
 use App\Classes\Utilities;
+use App\Models\Admin\Product;
 use Vanilo\Cart\Models\Cart;
 use Vanilo\Cart\Models\CartItem;
 use Vanilo\Adjustments\Contracts\Adjustable;
@@ -16,7 +17,7 @@ use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
 
-final class DiscountStore implements Adjuster
+final class DirectDiscount implements Adjuster
 {
 	use HasWriteableTitleAndDescription;
 	use IsLockable;
@@ -24,23 +25,25 @@ final class DiscountStore implements Adjuster
 
 	private Cart $cart;
 	private CartItem $item;
-	private $value;
+	private Product $product;
 
 	private float $single_amount;
 	private float $amount;
 
-	public function __construct(Cart $cart, CartItem $item, float $value)
+	public function __construct(Cart $cart, CartItem $item)
 	{
 		$this->cart = $cart;
 		$this->item = $item;
-		$this->value = $value;
+		$this->product = $this->item->product;
 
-		$prices = $item->product->calculatePrice('perc', $value, $item->getAdjustedPrice());
-		
+		$prices = $this->item->product->calculatePrice($this->product->discount_type == '%' ? 'perc' : 'num', (float) $this->product->discount, $this->item->getAdjustedPrice());
+
 		$this->single_amount = $prices->discount;
-		$this->amount = $prices->discount * $item->quantity();
+		$this->amount = $prices->discount * $this->item->quantity();
 
-		$this->setTitle('Store');
+		debug("Product [" . $this->item->product->name . "] --- Base price [" . $this->item->getAdjustedPrice() . "] --- Applying discount [DIRECT DISCOUNT] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
+
+		$this->setTitle($this->product->name ?? '');
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
@@ -50,7 +53,7 @@ final class DiscountStore implements Adjuster
 		$cart = Cart::model();
 		$item = CartItem::find($adjustment->adjustable_id);
 
-		return new self($cart, $item, $data['value'] ?? 0);
+		return new self($cart, $item);
 	}
 
 	public function createAdjustment(Adjustable $adjustable): Adjustment
@@ -75,15 +78,14 @@ final class DiscountStore implements Adjuster
 	private function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
-			'type' 				=> AdjustmentTypeProxy::STORE_DISCOUNT(),
+			'type' 				=> AdjustmentTypeProxy::DIRECT_DISCOUNT(),
 			'adjustable_type' 	=> $adjustable->getMorphClass(),
 			'adjustable_id' 	=> $adjustable->id,
 			'adjuster' 			=> self::class,
-			'origin' 			=> 'store',
+			'origin' 			=> $this->product->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
-				'value'			=> $this->value,
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
 				'amount' 		=> Utilities::RoundPrice($this->amount)
 			],
