@@ -26,10 +26,5 @@
     },
     "autoload": {
         "psr-4": { "Vanilo\\Adjustments\\": "" }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "3.x-dev"
-        }
     }
 }
