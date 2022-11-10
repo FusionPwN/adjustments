@@ -136,7 +136,7 @@ class RelationAdjustmentCollection implements AdjustmentCollection
         return $this->eloquentCollection()->getIterator();
     }
 
-    private function relation(): MorphMany
+    public function relation(): MorphMany
     {
         return $this->model->adjustmentsRelation();
     }
