@@ -23,14 +23,14 @@ final class DiscountInterval implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
-	private CartItem $item;
+	private mixed $cart;
+	private mixed $item;
 	private ProductIntervalPrice $interval;
 
 	private float $single_amount;
 	private float $amount;
 
-	public function __construct(Cart $cart, CartItem $item, ProductIntervalPrice $interval)
+	public function __construct(mixed $cart, mixed $item, ProductIntervalPrice $interval)
 	{
 		$this->cart = $cart;
 		$this->item = $item;
