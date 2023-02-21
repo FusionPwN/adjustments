@@ -24,8 +24,8 @@ final class DiscountLeastExpensiveFree implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
-	private CartItem $item;
+	private mixed $cart;
+	private mixed $item;
 	private Product $product;
 	private Discount $discount;
 
@@ -34,7 +34,7 @@ final class DiscountLeastExpensiveFree implements Adjuster
 	private float $free_quantity;
 	private float $remainder_quantity;
 
-	public function __construct(Cart $cart, CartItem $item, Discount $discount)
+	public function __construct(mixed $cart, mixed $item, Discount $discount)
 	{
 		$this->cart = $cart;
 		$this->item = $item;

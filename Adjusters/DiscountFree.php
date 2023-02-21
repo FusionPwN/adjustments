@@ -23,7 +23,7 @@ final class DiscountFree implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
+	private mixed $cart;
 	private Product $product;
 	private Discount $discount;
 
@@ -32,7 +32,7 @@ final class DiscountFree implements Adjuster
 	private float $free_quantity;
 	private string $sku;
 
-	public function __construct(Cart $cart, Discount $discount)
+	public function __construct(mixed $cart, Discount $discount)
 	{
 		$this->cart = $cart;
 		$this->discount = $discount;

@@ -23,14 +23,14 @@ final class DirectDiscount implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
-	private CartItem $item;
+	private mixed $cart;
+	private mixed $item;
 	private Product $product;
 
 	private float $single_amount;
 	private float $amount;
 
-	public function __construct(Cart $cart, CartItem $item)
+	public function __construct(mixed $cart, mixed $item)
 	{
 		$this->cart = $cart;
 		$this->item = $item;

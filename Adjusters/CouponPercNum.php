@@ -24,14 +24,14 @@ final class CouponPercNum implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
+	private mixed $cart;
 	private $item;
 	private Coupon $coupon;
 
 	private float $single_amount;
 	private float $amount;
 
-	public function __construct(Cart $cart, $item = null, Coupon $coupon)
+	public function __construct(mixed $cart, $item = null, Coupon $coupon)
 	{
 		$this->cart = $cart;
 		$this->item = $item;

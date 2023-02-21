@@ -23,14 +23,14 @@ final class DiscountPercNum implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
-	private CartItem $item;
+	private mixed $cart;
+	private mixed $item;
 	private Discount $discount;
 
 	private float $single_amount;
 	private float $amount;
 
-	public function __construct(Cart $cart, CartItem $item, Discount $discount)
+	public function __construct(mixed $cart, mixed $item, Discount $discount)
 	{
 		$this->cart = $cart;
 		$this->item = $item;
