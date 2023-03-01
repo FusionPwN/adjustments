@@ -22,13 +22,13 @@ final class CouponFreeShipping implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
+	private mixed $cart;
 	private Coupon $coupon;
 
 	private float $shippingAmount;
 	private float $amount;
 
-	public function __construct(Cart $cart, Coupon $coupon)
+	public function __construct(mixed $cart, Coupon $coupon)
 	{
 		$this->cart = $cart;
 		$this->coupon = $coupon;

@@ -24,12 +24,12 @@ final class ClientCard implements Adjuster
 	use IsLockable;
 	use IsNotIncluded;
 
-	private Cart $cart;
+	private mixed $cart;
 
 	private float $balance;
 	private Card $card;
 
-	public function __construct(float $balance, Card $card, Cart $cart)
+	public function __construct(float $balance, Card $card, mixed $cart)
 	{
 		$this->balance = $balance;
 		$this->card = $card;
@@ -63,9 +63,9 @@ final class ClientCard implements Adjuster
 
 		$balance = 0;
 
-		if(0 >= $retiredBalnce){
+		if (0 >= $retiredBalnce) {
 			$balance = $this->cart->total();
-		}else{
+		} else {
 			$balance = $this->balance;
 		}
 
