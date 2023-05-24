@@ -23,22 +23,33 @@ final class DiscountScalablePercNum implements Adjuster
 	use IsNotIncluded;
 
 	private mixed $cart;
+	private mixed $item;
 	private Discount $discount;
+	private int $level;
+	private int $levels;
 
 	private float $single_amount;
 	private float $amount;
+	private float $discount_value;
 
-	public function __construct(mixed $cart, Discount $discount)
+	public function __construct(mixed $cart, mixed $item, Discount $discount, int $level)
 	{
 		$this->cart = $cart;
+		$this->item = $item;
 		$this->discount = $discount;
+		$this->level = $level;
+		$this->levels = count($discount->properties->levels);
 
-		/* $prices = $item->product->calculatePrice($discount->type == '%' ? 'perc' : 'num', $discount->value, $item->getAdjustedPrice());
+		$this->discount_value = (float) $discount->properties->levels[$this->level];
+
+		$prices = $this->item->product->calculatePrice($discount->type == '%' ? 'perc' : 'num', $this->discount_value, $this->item->getAdjustedPrice());
 
 		$this->single_amount = $prices->discount;
-		$this->amount = $prices->discount * $item->quantity; */
+		$this->amount = $prices->discount * $this->item->quantity();
 
-		$this->setTitle($discount->name ?? null);
+		debug("Product [" . $this->item->product->name . "] --- Base price [" . $this->item->getAdjustedPrice() . "] --- Applying discount [$discount->name] VALUE [$this->discount_value] - LEVEL [$this->level + 1] OF [$this->levels] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
+
+		$this->setTitle($this->discount->name ?? null);
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
@@ -46,6 +57,7 @@ final class DiscountScalablePercNum implements Adjuster
 		$data = $adjustment->getData();
 
 		$cart = Cart::model();
+		#$item = CartItem::find($adjustment->adjustable_id);
 		$discount = Discount::find($adjustment->getOrigin());
 
 		return new self($cart, $discount);
@@ -73,7 +85,7 @@ final class DiscountScalablePercNum implements Adjuster
 	private function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
-			'type' 				=> AdjustmentTypeProxy::DESCONTO_PERC_EURO(),
+			'type' 				=> AdjustmentTypeProxy::OFERTA_PERCENTAGEM(),
 			'adjustable_type' 	=> $adjustable->getMorphClass(),
 			'adjustable_id' 	=> $adjustable->id,
 			'adjuster' 			=> self::class,
@@ -81,8 +93,11 @@ final class DiscountScalablePercNum implements Adjuster
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
-				'single_amount' => Utilities::RoundPrice($this->single_amount),
-				'amount' 		=> Utilities::RoundPrice($this->amount)
+				'single_amount' 	=> Utilities::RoundPrice($this->single_amount),
+				'amount' 			=> Utilities::RoundPrice($this->amount),
+				'level'				=> $this->level,
+				'levels'			=> $this->levels,
+				'discount_value' 	=> $this->discount_value,
 			],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
