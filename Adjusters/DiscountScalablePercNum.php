@@ -60,7 +60,7 @@ final class DiscountScalablePercNum implements Adjuster
 		#$item = CartItem::find($adjustment->adjustable_id);
 		$discount = Discount::find($adjustment->getOrigin());
 
-		return new self($cart, $discount);
+		return new self($cart, $discount, null, null);
 	}
 
 	public function createAdjustment(Adjustable $adjustable): Adjustment
