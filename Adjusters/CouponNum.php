@@ -6,7 +6,6 @@ namespace Vanilo\Adjustments\Adjusters;
 
 use App\Classes\Utilities;
 use App\Models\Admin\Coupon;
-use App\Models\Admin\Product;
 use Vanilo\Cart\Models\Cart;
 use Vanilo\Cart\Models\CartItem;
 use Vanilo\Adjustments\Contracts\Adjustable;
@@ -18,7 +17,7 @@ use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
 
-final class CouponPercNum implements Adjuster
+final class CouponNum implements Adjuster
 {
 	use HasWriteableTitleAndDescription;
 	use IsLockable;
@@ -37,20 +36,13 @@ final class CouponPercNum implements Adjuster
 		$this->item = $item;
 		$this->coupon = $coupon;
 
-		if (isset($this->item)) {
-			$prices = $this->item->product->calculatePrice($coupon->type == 'percentage' ? 'perc' : 'num', $coupon->value, $this->item->getAdjustedPrice());
-			$this->single_amount = $prices->discount;
-			$this->amount = $prices->discount * $item->quantity();
-			
-			debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
-		} else {
-			$prices = Product::calculatePrice($coupon->type == 'percentage' ? 'perc' : 'num', $coupon->value, $this->cart->total());
-			$this->single_amount = $prices->discount;
-			$this->amount = $prices->discount;
+		$value = (($this->item->getAdjustedPrice() * $this->item->quantity()) / $this->cart->itemsTotal()) * $coupon->value;
 
-			debug("Cart [" . $this->cart->total() . "] --- Applying coupon to  total [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
-		}
-
+		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice());
+		$this->single_amount = $prices->discount;
+		$this->amount = $prices->discount;
+		
+		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle($this->coupon->name ?? null);
 	}
@@ -97,7 +89,8 @@ final class CouponPercNum implements Adjuster
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
-				'amount' 		=> Utilities::RoundPrice($this->amount)
+				'amount' 		=> Utilities::RoundPrice($this->amount),
+				'type' 			=> 'num',
 			],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
