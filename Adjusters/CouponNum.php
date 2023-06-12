@@ -36,12 +36,15 @@ final class CouponNum implements Adjuster
 		$this->item = $item;
 		$this->coupon = $coupon;
 
-		$value = ($this->item->getAdjustedPrice() / $this->cart->items->sum('adjusted_price')) * $coupon->value;
+		$total = $this->cart->items->sum(function ($item) {
+			return $item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $item->quantity();
+		});
 
-		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice());
-		$this->single_amount = $prices->discount;
-		$this->amount = $prices->discount * $this->item->quantity();
-		
+		$value = (($this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity()) / $total) * $coupon->value;
+		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity());
+		$this->single_amount = $prices->discount / $this->item->quantity();
+		$this->amount = $prices->discount;
+
 		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle($this->coupon->name ?? null);
