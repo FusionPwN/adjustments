@@ -91,7 +91,7 @@ final class CouponNum implements Adjuster
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
-				'single_amount' => Utilities::RoundPrice($this->single_amount),
+				'single_amount' => $this->single_amount,
 				'amount' 		=> Utilities::RoundPrice($this->amount),
 				'type' 			=> 'num',
 			],
