@@ -94,7 +94,8 @@ final class DiscountSameFree implements Adjuster
 			'data' 				=> [
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
 				'amount' 		=> Utilities::RoundPrice($this->amount),
-				'quantity'		=> $this->free_quantity
+				'quantity'		=> $this->free_quantity,
+				'sku'			=> $this->product->sku
 			],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),

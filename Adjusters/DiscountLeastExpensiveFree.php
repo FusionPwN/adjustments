@@ -111,7 +111,8 @@ final class DiscountLeastExpensiveFree implements Adjuster
 				'single_amount' 		=> Utilities::RoundPrice($this->single_amount),
 				'amount' 				=> Utilities::RoundPrice($this->amount),
 				'quantity'				=> $this->free_quantity,
-				'remainder_quantity'	=> $this->remainder_quantity
+				'remainder_quantity'	=> $this->remainder_quantity,
+				'sku'					=> $this->product->sku
 			],
 			'amount' 					=> $this->calculateAmount($adjustable),
 			'is_locked' 				=> $this->isLocked(),
