@@ -31,38 +31,18 @@ final class DiscountLeastExpensiveFree implements Adjuster
 
 	private float $single_amount;
 	private float $amount;
-	private float $free_quantity;
-	private float $remainder_quantity;
+	private float $offer_quantity;
 
-	public function __construct(mixed $cart, mixed $item, Discount $discount)
+	public function __construct(mixed $cart, mixed $item, Discount $discount, int $offer_quantity)
 	{
 		$this->cart = $cart;
 		$this->item = $item;
 		$this->product = $item->product;
 		$this->discount = $discount;
-		
-		$discount_items = collect($cart->applyableDiscounts[$discount->id]['cart_items']);
-		$nr_products = $discount_items->sum('quantity');
-		
-		if(isset($discount['remainder_quantity'])){
-			$this->free_quantity = $discount['remainder_quantity'];
-		}else{
-			$remainder = $nr_products % $discount->purchase_number;
-			$this->free_quantity = (($nr_products - $remainder) / $discount->purchase_number) * $discount->offer_number;
-		}
-		
-		$free_quantityOriginal = $this->free_quantity;
-		$qtd = $item->quantity - $this->free_quantity;
-
-		if(0 > $qtd){
-			$this->free_quantity = $this->free_quantity + $qtd;
-			$this->remainder_quantity = $free_quantityOriginal - $this->free_quantity;
-		}else{
-			$this->remainder_quantity = 0;
-		}
+		$this->offer_quantity = $offer_quantity;
 
 		$this->single_amount = $item->getAdjustedPrice();
-		$this->amount = $this->single_amount * $this->free_quantity;
+		$this->amount = $this->single_amount * $this->offer_quantity;
 
 		$this->setTitle($this->discount->name ?? null);
 	}
@@ -75,7 +55,7 @@ final class DiscountLeastExpensiveFree implements Adjuster
 		$item = CartItem::find($adjustment->adjustable_id);
 		$discount = Discount::find($adjustment->getOrigin());
 
-		return new self($cart, $item, $discount);
+		return new self($cart, $item, $discount, 0);
 	}
 
 	public function createAdjustment(Adjustable $adjustable): Adjustment
@@ -110,8 +90,7 @@ final class DiscountLeastExpensiveFree implements Adjuster
 			'data' 						=> [
 				'single_amount' 		=> Utilities::RoundPrice($this->single_amount),
 				'amount' 				=> Utilities::RoundPrice($this->amount),
-				'quantity'				=> $this->free_quantity,
-				'remainder_quantity'	=> $this->remainder_quantity,
+				'quantity'				=> $this->offer_quantity,
 				'sku'					=> $this->product->sku
 			],
 			'amount' 					=> $this->calculateAmount($adjustable),
