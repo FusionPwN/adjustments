@@ -56,7 +56,11 @@ final class SimpleShippingFee implements Adjuster
 
 	private function calculateAmount(Adjustable $adjustable): float
 	{
-		$subTotal = $adjustable->subTotal() - $this->amount;
+		if(isset($adjustable->activeCoupon)){
+			$subTotal = $adjustable->subTotal() - $this->amount;
+		} else {
+			$subTotal = $adjustable->subTotal();
+		}
 		
 		if (null !== $this->freeThreshold && $subTotal >= $this->freeThreshold) {
 			debug("Adding shipping free --- Cart total [" . $subTotal . "] --- Threshold [$this->freeThreshold] --- Final applied value [0]");
