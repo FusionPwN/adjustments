@@ -27,27 +27,19 @@ final class DiscountFree implements Adjuster
 	private Product $product;
 	private Discount $discount;
 
-	private float $single_amount;
-	private float $amount;
-	private float $free_quantity;
-	private string $sku;
+	private float $single_amount = 0;
+	private float $amount = 0;
+	private float $nr_possible_gifts = 0;
+	private array $possible_gifts;
+	private array $selected_gifts = [];
 
-	public function __construct(mixed $cart, Discount $discount)
+	public function __construct(mixed $cart, Discount $discount, float $nr_possible_gifts)
 	{
-		$this->cart = $cart;
-		$this->discount = $discount;
-
-		$discount_items = collect($cart->applyableDiscounts[$discount->id]['cart_items']);
-		$nr_products = $discount_items->sum('quantity');
-
-		$remainder = $nr_products % $discount->purchase_number;
-		$this->free_quantity = (($nr_products - $remainder) / $discount->purchase_number) * $discount->offer_number;
-
-		$this->sku = $this->discount->referencia;
-		$this->product = Product::where('sku', $this->sku)->get()->first();
-		
-		$this->single_amount = $this->product->getPriceVat();
-		$this->amount = 0;
+		$this->cart 				= $cart;
+		$this->discount 			= $discount;
+		$this->nr_possible_gifts 	= $nr_possible_gifts;
+		$this->possible_gifts 		= $discount->properties->refs;
+		$this->selected_gifts 		= session('checkout.selected_gifts', []);
 
 		$this->setTitle($this->discount->name ?? null);
 	}
@@ -92,10 +84,11 @@ final class DiscountFree implements Adjuster
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
-				'single_amount' => Utilities::RoundPrice($this->single_amount),
-				'amount' 		=> Utilities::RoundPrice($this->amount),
-				'quantity'		=> $this->free_quantity,
-				'sku'			=> $this->sku
+				'single_amount' 	=> Utilities::RoundPrice($this->single_amount),
+				'amount' 			=> Utilities::RoundPrice($this->amount),
+				'nr_possible_gifts' => $this->nr_possible_gifts,
+				'possible_gifts' 	=> $this->possible_gifts,
+				'selected_gifts' 	=> $this->selected_gifts
 			],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
