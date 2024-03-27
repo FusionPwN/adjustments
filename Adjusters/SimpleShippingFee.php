@@ -25,19 +25,21 @@ final class SimpleShippingFee implements Adjuster
 	private ShipmentMethod $shipping;
 	private float $amount;
 	private ?float $freeThreshold;
+	private ?string $cause;
 
-	public function __construct(ShipmentMethod $shipping, float $amount, ?float $freeThreshold = null)
+	public function __construct(ShipmentMethod $shipping, float $amount, ?float $freeThreshold = null, ?string $cause = null)
 	{
 		$this->shipping = $shipping;
 		$this->amount = $amount;
 		$this->freeThreshold = $freeThreshold;
+		$this->cause = $cause;
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
 	{
 		$data = $adjustment->getData();
 
-		return new self(ShipmentMethod::find($adjustment->origin ?? 0), floatval($data['amount'] ?? 0), $data['freeThreshold'] ?? null);
+		return new self(ShipmentMethod::find($adjustment->origin ?? 0), floatval($data['amount'] ?? 0), $data['freeThreshold'] ?? null, $data['cause'] ?? null);
 	}
 
 	public function createAdjustment(Adjustable $adjustable): Adjustment
@@ -57,11 +59,11 @@ final class SimpleShippingFee implements Adjuster
 	private function calculateAmount(Adjustable $adjustable): float
 	{
 		if (null !== $this->freeThreshold && $adjustable->subTotal() >= $this->freeThreshold) {
-			debug("Adding shipping free --- Cart total [" . $adjustable->subTotal() . "] --- Threshold [$this->freeThreshold] --- Final applied value [0]");
+			debug("Adding shipping fee --- Cart total [" . $adjustable->subTotal() . "] --- Threshold [$this->freeThreshold] --- Final applied value [hc 0] --- Cause [$this->cause]");
 			return 0;
 		}
 
-		debug("Adding shipping free --- Cart total [" . $adjustable->subTotal() . "] --- Threshold [$this->freeThreshold] --- Final applied value [$this->amount]");
+		debug("Adding shipping fee --- Cart total [" . $adjustable->subTotal() . "] --- Threshold [$this->freeThreshold] --- Final applied value [$this->amount]");
 
 		return $this->amount;
 	}
@@ -76,7 +78,7 @@ final class SimpleShippingFee implements Adjuster
 			'origin' 			=> $this->shipping->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
-			'data' 				=> ['amount' => $this->amount, 'freeThreshold' => $this->freeThreshold],
+			'data' 				=> ['amount' => $this->amount, 'freeThreshold' => $this->freeThreshold, 'cause' => $this->cause],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
 			'is_included' 		=> $this->isIncluded(),
