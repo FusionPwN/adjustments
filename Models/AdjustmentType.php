@@ -41,6 +41,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 	public const SHIPPING 				= 'shipping';
 	public const COUPON_PERC_NUM 		= 'coupon_perc_num';
 	public const COUPON_FREE_SHIPPING 	= 'coupon_free_shipping';
+	public const COUPON_FREE_PRODUCT 	= 'coupon_free_product';
 	public const DIRECT_DISCOUNT 		= 'direct_discount';
 	public const CLIENT_CARD 			= 'client_card';
 	public const FEE_PACKAGING_BAG 		= 'fee_packaging_bag';
@@ -49,7 +50,8 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 	protected static $VISUAL_SEPARATORS = [
 		self::OFERTA_BARATO,
 		self::OFERTA_PROD_IGUAL,
-		self::OFERTA_PROD
+		self::OFERTA_PROD,
+		self::COUPON_FREE_PRODUCT
 	];
 
 	# para separar as campanhas
@@ -73,7 +75,8 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 
 	protected static $COUPONS = [
 		self::COUPON_PERC_NUM,
-		self::COUPON_FREE_SHIPPING
+		self::COUPON_FREE_SHIPPING,
+		self::COUPON_FREE_PRODUCT,
 	];
 
 	protected static array $labels = [];
@@ -93,6 +96,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 			self::SHIPPING 				=> __('backoffice.adjustment.shipping_fee'),
 			self::COUPON_PERC_NUM 		=> __('backoffice.adjustment.coupon_percentage_euros'),
 			self::COUPON_FREE_SHIPPING 	=> __('backoffice.adjustment.postage_coupon'),
+			self::COUPON_FREE_PRODUCT 	=> __('backoffice.adjustment.coupon_free_product'),
 			self::CLIENT_CARD 			=> __('backoffice.adjustment.client_card'),
 			self::FEE_PACKAGING_BAG 	=> __('backoffice.adjustment.fee_packaging_order_bag'),
 		];
