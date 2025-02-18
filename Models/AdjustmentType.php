@@ -45,6 +45,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 	public const DIRECT_DISCOUNT 		= 'direct_discount';
 	public const CLIENT_CARD 			= 'client_card';
 	public const FEE_PACKAGING_BAG 		= 'fee_packaging_bag';
+	public const PAYMENT_FEE 			= 'payment_fee';
 
 	# para separar os produtos de oferta nas listagens do checkout e backoffice
 	protected static $VISUAL_SEPARATORS = [
@@ -99,6 +100,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 			self::COUPON_FREE_PRODUCT 	=> __('backoffice.adjustment.coupon_free_product'),
 			self::CLIENT_CARD 			=> __('backoffice.adjustment.client_card'),
 			self::FEE_PACKAGING_BAG 	=> __('backoffice.adjustment.fee_packaging_order_bag'),
+			self::PAYMENT_FEE 			=> __('backoffice.adjustment.payment_fee'),
 		];
 	}
 
