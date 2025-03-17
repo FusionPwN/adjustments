@@ -54,7 +54,6 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 		self::OFERTA_PROD_IGUAL,
 		self::OFERTA_PROD,
 		self::COUPON_FREE_PRODUCT,
-		self::FREEBIE_OFFER,
 	];
 
 	# para separar as campanhas
@@ -80,6 +79,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 		self::COUPON_PERC_NUM,
 		self::COUPON_FREE_SHIPPING,
 		self::COUPON_FREE_PRODUCT,
+		self::FREEBIE_OFFER,
 	];
 
 	protected static array $labels = [];
