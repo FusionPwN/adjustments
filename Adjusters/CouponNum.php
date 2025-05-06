@@ -32,28 +32,56 @@ final class CouponNum implements Adjuster
 
 	public function __construct(mixed $cart, $item = null, Coupon $coupon)
 	{
-		$this->cart = $cart;
-		$this->item = $item;
-		$this->coupon = $coupon;
+		$this->cart = $cart; // Armazena o carrinho atual.
+		$this->item = $item; // Armazena o item atual do carrinho.
+		$this->coupon = $coupon; // Armazena o cupão aplicado.
 
 		$total = $this->cart->items->sum(function ($item) {
+			// Calcula o total ajustado de todos os itens no carrinho.
 			return $item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $item->quantity();
 		});
 
-		$value = (($this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity()) / $total) * $coupon->value;
-		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity());
-		
-		if($prices->discount == 0){
-			$this->single_amount = $prices->price;
+		// Evita divisão por zero verificando se o total é igual a zero.
+		if ($total == 0) {
+			$value = 0; // Define o valor como zero se o total for zero.
 		} else {
-			$this->single_amount = $prices->discount / $this->item->quantity();
-		}
-		
-		$this->amount = $prices->discount;
+			
+			// Calcula o valor proporcional do cupão para o item atual.
+			$value = (($this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()])) / $total) * $coupon->value;
+			$value = round($value, 2); // Arredonda o valor calculado.
+			$value = $value * $this->item->quantity(); // Multiplica pelo número de itens.
+				// Ajusta o valor do último item para compensar diferenças de arredondamento.
+			$remainingValue = $coupon->value - $this->cart->items->reduce(function ($carry, $cartItem) use ($item, $total, $coupon) {
+				if ($cartItem->id !== $item->id) {
+					// Soma os valores arredondados dos outros itens.
+					$value = round((($cartItem->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()])) / $total) * $coupon->value, 2);
+					$value = $value * $cartItem->quantity(); // Multiplica pelo número de itens.
+					$carry += $value;
+				}
+				return $carry; // Retorna o valor acumulado.
+			}, 0);
 
+			// Se o item atual for o último no carrinho, ajusta o valor para compensar.
+			if ($this->cart->items->last()->id === $this->item->id) {
+				$value = $remainingValue;
+			}
+		}
+
+		// Calcula os preços ajustados do produto com base no valor do cupão.
+		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity());
+		// Define o valor por unidade com base no desconto ou no preço ajustado.
+		if ($prices->discount == 0) {
+			$this->single_amount = round($prices->price,2); // Sem desconto, usa o preço ajustado.
+		} else {
+			$this->single_amount = round($prices->discount / $this->item->quantity(),2); // Com desconto, calcula o valor por unidade.
+		}
+
+		$this->amount = $prices->discount; // Define o valor total do desconto.
+
+		// Registra informações de depuração sobre o cupão aplicado.
 		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
-		$this->setTitle($this->coupon->name ?? null);
+		$this->setTitle($this->coupon->name ?? null); // Define o título do ajuste com o nome do cupão.
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
