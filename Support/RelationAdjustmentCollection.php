@@ -25,131 +25,139 @@ use Vanilo\Adjustments\Contracts\AdjustmentType;
 
 class RelationAdjustmentCollection implements AdjustmentCollection
 {
-    private Adjustable $model;
+	private Adjustable $model;
 
-    private ?AdjustmentType $typeFilter = null;
+	private ?AdjustmentType $typeFilter = null;
 
-    public function __construct(Adjustable $model)
-    {
-        $this->model = $model;
-    }
+	public function __construct(Adjustable $model)
+	{
+		$this->model = $model;
+	}
 
-    public function adjustable(): Adjustable
-    {
-        return $this->model;
-    }
+	public function adjustable(): Adjustable
+	{
+		return $this->model;
+	}
 
-    public function create(Adjuster $adjuster): Adjustment
-    {
-        $adjustment = $adjuster->createAdjustment($this->adjustable());
-        $this->add($adjustment);
+	public function create(Adjuster $adjuster): Adjustment
+	{
+		$adjustment = $adjuster->createAdjustment($this->adjustable());
+		$this->add($adjustment);
 
-        return $adjustment;
-    }
+		return $adjustment;
+	}
 
-    public function total(): float
-    {
-        return floatval($this->eloquentCollection()->sum('amount'));
-    }
+	public function total(array $excludes = []): float
+	{
+		$collection = $this->eloquentCollection();
 
-    public function isEmpty(): bool
-    {
-        return $this->eloquentCollection()->isEmpty();
-    }
+		if (count($excludes) > 0) {
+			$collection = $collection->filter(function (Adjustment $adjustment) use ($excludes) {
+				return in_array($adjustment->type, $excludes, true);
+			});
+		}
 
-    public function isNotEmpty(): bool
-    {
-        return $this->eloquentCollection()->isNotEmpty();
-    }
+		return floatval($collection->sum('amount'));
+	}
 
-    public function add(Adjustment $adjustment): void
-    {
-        $adjustment->setAdjustable($this->model);
-        $this->relation()->save($adjustment);
-        // Refresh the collection so that the new element to shows up
-        $this->model->load('adjustmentsRelation');
-    }
+	public function isEmpty(): bool
+	{
+		return $this->eloquentCollection()->isEmpty();
+	}
 
-    public function remove(Adjustment $adjustment): void
-    {
-        if ($adjustment instanceof Model) {
-            $items = $this->eloquentCollection();
-            // This is the dirty part where it's flipping from Adjustment to Model
-            $items->each(function (Model $item, $key) use ($adjustment, $items) {
-                if ($item->getKey() === $adjustment->getKey()) {
-                    $item->delete();
-                    $items->forget($key);
-                }
-            });
-        }
-    }
+	public function isNotEmpty(): bool
+	{
+		return $this->eloquentCollection()->isNotEmpty();
+	}
 
-    public function byType(AdjustmentType $type): AdjustmentCollection
-    {
-        $result = new self($this->model);
-        $result->typeFilter = $type;
+	public function add(Adjustment $adjustment): void
+	{
+		$adjustment->setAdjustable($this->model);
+		$this->relation()->save($adjustment);
+		// Refresh the collection so that the new element to shows up
+		$this->model->load('adjustmentsRelation');
+	}
 
-        return $result;
-    }
+	public function remove(Adjustment $adjustment): void
+	{
+		if ($adjustment instanceof Model) {
+			$items = $this->eloquentCollection();
+			// This is the dirty part where it's flipping from Adjustment to Model
+			$items->each(function (Model $item, $key) use ($adjustment, $items) {
+				if ($item->getKey() === $adjustment->getKey()) {
+					$item->delete();
+					$items->forget($key);
+				}
+			});
+		}
+	}
 
-    public function offsetExists($offset)
-    {
-        return $this->eloquentCollection()->offsetExists($offset);
-    }
+	public function byType(AdjustmentType $type): AdjustmentCollection
+	{
+		$result = new self($this->model);
+		$result->typeFilter = $type;
 
-    public function offsetGet($offset)
-    {
-        return $this->eloquentCollection()->offsetGet($offset);
-    }
+		return $result;
+	}
 
-    public function offsetSet($offset, $value)
-    {
-        if (!is_object($value) || ! ($value instanceof Adjustment)) {
-            throw new \InvalidArgumentException('Only objects implementing the Adjustment interface can be used');
-        }
+	public function offsetExists($offset)
+	{
+		return $this->eloquentCollection()->offsetExists($offset);
+	}
 
-        $this->eloquentCollection()->offsetSet($offset, $value);
-    }
+	public function offsetGet($offset)
+	{
+		return $this->eloquentCollection()->offsetGet($offset);
+	}
 
-    public function offsetUnset($offset)
-    {
-        $this->eloquentCollection()->offsetUnset($offset);
-    }
+	public function offsetSet($offset, $value)
+	{
+		if (!is_object($value) || ! ($value instanceof Adjustment)) {
+			throw new \InvalidArgumentException('Only objects implementing the Adjustment interface can be used');
+		}
 
-    public function count()
-    {
-        return $this->eloquentCollection()->count();
-    }
+		$this->eloquentCollection()->offsetSet($offset, $value);
+	}
 
-    public function first(): ?Adjustment
-    {
-        return $this->eloquentCollection()->first();
-    }
+	public function offsetUnset($offset)
+	{
+		$this->eloquentCollection()->offsetUnset($offset);
+	}
 
-    public function last(): ?Adjustment
-    {
-        return $this->eloquentCollection()->last();
-    }
+	public function count()
+	{
+		return $this->eloquentCollection()->count();
+	}
 
-    public function getIterator()
-    {
-        return $this->eloquentCollection()->getIterator();
-    }
+	public function first(): ?Adjustment
+	{
+		return $this->eloquentCollection()->first();
+	}
 
-    public function relation(): MorphMany
-    {
-        return $this->model->adjustmentsRelation();
-    }
+	public function last(): ?Adjustment
+	{
+		return $this->eloquentCollection()->last();
+	}
 
-    private function eloquentCollection(): Collection
-    {
-        /** @var Collection $collection */
-        $collection = $this->model->adjustmentsRelation;
+	public function getIterator()
+	{
+		return $this->eloquentCollection()->getIterator();
+	}
 
-        if (null === $this->typeFilter) {
-            return $collection;
-        }
+	public function relation(): MorphMany
+	{
+		return $this->model->adjustmentsRelation();
+	}
 
-        return $collection->filter(fn (Adjustment $adjustment) => $this->typeFilter->equals($adjustment->type));
-    }
+	private function eloquentCollection(): Collection
+	{
+		/** @var Collection $collection */
+		$collection = $this->model->adjustmentsRelation;
+
+		if (null === $this->typeFilter) {
+			return $collection;
+		}
+
+		return $collection->filter(fn(Adjustment $adjustment) => $this->typeFilter->equals($adjustment->type));
+	}
 }

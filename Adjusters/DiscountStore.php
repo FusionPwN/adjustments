@@ -28,6 +28,7 @@ final class DiscountStore implements Adjuster
 
 	private float $single_amount;
 	private float $amount;
+	private float $price_before;
 
 	public function __construct(mixed $cart, mixed $item, float $value)
 	{
@@ -35,12 +36,14 @@ final class DiscountStore implements Adjuster
 		$this->item = $item;
 		$this->value = $value;
 
-		$prices = $item->product->calculatePrice('perc', $value, $item->getAdjustedPrice());
-		
+		$this->price_before = $item->getAdjustedPrice();
+
+		$prices = $item->product->calculatePrice('perc', $value, $this->price_before);
+
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
 
-		$this->setTitle('Store');
+		$this->setTitle('frontoffice.store-discount');
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
@@ -85,7 +88,8 @@ final class DiscountStore implements Adjuster
 			'data' 				=> [
 				'value'			=> $this->value,
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
-				'amount' 		=> Utilities::RoundPrice($this->amount)
+				'amount' 		=> Utilities::RoundPrice($this->amount),
+				'price_before' 	=> Utilities::RoundPrice($this->price_before),
 			],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
