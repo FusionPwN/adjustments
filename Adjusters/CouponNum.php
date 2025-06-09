@@ -16,6 +16,7 @@ use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
+use Vanilo\Product\Models\ProductProxy;
 
 final class CouponNum implements Adjuster
 {
@@ -29,6 +30,9 @@ final class CouponNum implements Adjuster
 
 	private float $single_amount;
 	private float $amount;
+	private float $nr_possible_gifts = 0;
+	private array $possible_gifts;
+	private array $selected_gifts = [];
 
 	public function __construct(mixed $cart, $item = null, Coupon $coupon)
 	{
@@ -77,6 +81,14 @@ final class CouponNum implements Adjuster
 		}
 
 		$this->amount = $prices->discount; // Define o valor total do desconto.
+
+		if($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value){
+			$this->nr_possible_gifts 	= 1;
+			$this->possible_gifts 		= ProductProxy::withoutEvents(function () {
+				return $this->coupon->gifts->pluck('id')->toArray();
+			});
+			$this->selected_gifts 		= session('checkout.coupon-selected_gifts', []);
+		}
 
 		// Registra informações de depuração sobre o cupão aplicado.
 		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
@@ -128,6 +140,9 @@ final class CouponNum implements Adjuster
 				'single_amount' => $this->single_amount,
 				'amount' 		=> Utilities::RoundPrice($this->amount),
 				'type' 			=> 'num',
+				'nr_possible_gifts' => $this->nr_possible_gifts,
+				'possible_gifts' 	=> $this->possible_gifts,
+				'selected_gifts' 	=> $this->selected_gifts
 			],
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
