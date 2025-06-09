@@ -31,7 +31,7 @@ final class CouponNum implements Adjuster
 	private float $single_amount;
 	private float $amount;
 	private float $nr_possible_gifts = 0;
-	private array $possible_gifts;
+	private array $possible_gifts = [];
 	private array $selected_gifts = [];
 
 	public function __construct(mixed $cart, $item = null, Coupon $coupon)
