@@ -34,6 +34,8 @@ final class ClientCard implements Adjuster
 		$this->balance = $balance;
 		$this->card = $card;
 		$this->cart = $cart;
+
+		$this->setTitle('backoffice.adjustment.client_card');
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster

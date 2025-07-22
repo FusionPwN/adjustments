@@ -30,6 +30,8 @@ final class SimplePaymentFee implements Adjuster
 	{
 		$this->payment = $payment;
 		$this->amount = $amount;
+
+		$this->setTitle('backoffice.adjustment.payment_fee');
 	}
 
     public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster

@@ -43,7 +43,7 @@ final class DirectDiscount implements Adjuster
 
 		debug("Product [" . $this->item->product->name . "] --- Base price [" . $this->item->getAdjustedPrice() . "] --- Applying discount [DIRECT DISCOUNT] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
-		$this->setTitle($this->product->name ?? '');
+		$this->setTitle($this->product->discount_label ?? $this->product->name);
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster

@@ -41,7 +41,7 @@ final class DiscountInterval implements Adjuster
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
 
-		$this->setTitle('Interval');
+		$this->setTitle('backoffice.adjustment.interval_discount');
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster

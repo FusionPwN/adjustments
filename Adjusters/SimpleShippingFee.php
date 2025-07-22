@@ -33,6 +33,8 @@ final class SimpleShippingFee implements Adjuster
 		$this->amount = $amount;
 		$this->freeThreshold = $freeThreshold;
 		$this->cause = $cause;
+
+		$this->setTitle('backoffice.adjustment.shipping_fee');
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster

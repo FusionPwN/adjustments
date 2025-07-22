@@ -26,6 +26,8 @@ final class FeePackagingBag implements Adjuster
     public function __construct(float $amount)
     {
         $this->amount = $amount;
+
+        $this->setTitle('backoffice.adjustment.fee_packaging_order_bag');
     }
 
     public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
