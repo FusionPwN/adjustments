@@ -17,7 +17,7 @@
     "require": {
         "php": "^8.0|^8.2|^8.4",
         "konekt/concord": "^1.6",
-        "konekt/enum": "^3.1.1 | ^4.0",
+        "konekt/enum": "^3.1.1 | ^4.1",
         "konekt/enum-eloquent": "^1.8.1"
     },
     "require-dev": {
