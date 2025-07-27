@@ -107,7 +107,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 		];
 	}
 
-	public static function choices()
+	public static function choices(): array
 	{
 		$result = [];
 		$choices = parent::choices();
