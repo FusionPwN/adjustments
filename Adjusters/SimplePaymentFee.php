@@ -15,64 +15,73 @@ use Vanilo\Adjustments\Contracts\Adjustable;
 use Vanilo\Adjustments\Models\AdjustmentProxy;
 use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
 
-
 final class SimplePaymentFee implements Adjuster
 {
     use HasWriteableTitleAndDescription;
-	use IsLockable;
-	use IsNotIncluded;
+    use IsLockable;
+    use IsNotIncluded;
     use IsAPaymentAdjusment;
 
     private PaymentMethod $payment;
-	private float $amount;
 
-    public function __construct(PaymentMethod $payment, float $amount)
-	{
-		$this->payment = $payment;
-		$this->amount = $amount;
-	}
+    public function __construct(PaymentMethod $payment)
+    {
+        $this->payment = $payment;
+
+        $this->setTitle('backoffice.adjustment.payment_fee');
+    }
 
     public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
-	{
-		$data = $adjustment->getData();
+    {
+        $payment = PaymentMethod::find($adjustment->origin ?? 0);
 
-		return new self(PaymentMethod::find($adjustment->origin ?? 0), floatval($data['amount'] ?? 0));
-	}
+        return new self($payment);
+    }
 
     public function createAdjustment(Adjustable $adjustable): Adjustment
-	{
-		$adjustmentClass = AdjustmentProxy::modelClass();
+    {
+        $adjustmentClass = AdjustmentProxy::modelClass();
 
-		return new $adjustmentClass($this->getModelAttributes($adjustable));
-	}
+        return new $adjustmentClass($this->getModelAttributes($adjustable));
+    }
 
     public function recalculate(Adjustment $adjustment, Adjustable $adjustable): Adjustment
-	{
-		$adjustment->setAmount($this->calculateAmount($adjustable));
+    {
+        $adjustment->setAmount($this->calculateAmount($adjustable));
 
-		return $adjustment;
-	}
+        return $adjustment;
+    }
 
     private function calculateAmount(Adjustable $adjustable): float
-	{
-		return $this->amount;
-	}
+    {
+        $fee = (float) $this->payment->fee;
+
+        if ($this->payment->fee_type === 'percentage') {
+            return round(($adjustable->total() * $fee) / 100, 2);
+        }
+
+        return $fee;
+    }
 
     private function getModelAttributes(Adjustable $adjustable): array
-	{
-		return [
-			'type' 				=> AdjustmentTypeProxy::PAYMENT_FEE(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
-			'origin' 			=> $this->payment->id,
-			'title' 			=> $this->getTitle(),
-			'description' 		=> $this->getDescription(),
-			'data' 				=> ['amount' => $this->amount],
-			'amount' 			=> $this->calculateAmount($adjustable),
-			'is_locked' 		=> $this->isLocked(),
-			'is_included' 		=> $this->isIncluded(),
-		];
-	}
+    {
+        $amount = $this->calculateAmount($adjustable);
 
+        return [
+            'type'              => AdjustmentTypeProxy::PAYMENT_FEE(),
+            'adjustable_type'   => $adjustable->getMorphClass(),
+            'adjustable_id'     => $adjustable->id,
+            'adjuster'          => self::class,
+            'origin'            => $this->payment->id,
+            'title'             => $this->getTitle(),
+            'description'       => $this->getDescription(),
+            'data'              => [
+                'fee'      => $this->payment->fee,
+                'fee_type' => $this->payment->fee_type,
+            ],
+            'amount'            => $amount,
+            'is_locked'         => $this->isLocked(),
+            'is_included'       => $this->isIncluded(),
+        ];
+    }
 }

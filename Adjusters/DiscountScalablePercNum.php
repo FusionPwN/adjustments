@@ -43,7 +43,7 @@ final class DiscountScalablePercNum implements Adjuster
 		$this->levels = count($discount->properties->levels);
 		$this->quantity = $quantity;
 
-		$this->discount_value = (float) $discount->properties->levels[$this->level];
+		$this->discount_value = (float) ($this->level == -1 ? 0 : $discount->properties->levels[$this->level]);
 
 		$this->price_before =  $this->item->getAdjustedPrice();
 
