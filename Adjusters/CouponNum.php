@@ -49,12 +49,12 @@ final class CouponNum implements Adjuster
 		if ($total == 0) {
 			$value = 0; // Define o valor como zero se o total for zero.
 		} else {
-			
+
 			// Calcula o valor proporcional do cupão para o item atual.
 			$value = (($this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()])) / $total) * $coupon->value;
 			$value = round($value, 2); // Arredonda o valor calculado.
 			$value = $value * $this->item->quantity(); // Multiplica pelo número de itens.
-				// Ajusta o valor do último item para compensar diferenças de arredondamento.
+			// Ajusta o valor do último item para compensar diferenças de arredondamento.
 			$remainingValue = $coupon->value - $this->cart->items->reduce(function ($carry, $cartItem) use ($item, $total, $coupon) {
 				if ($cartItem->id !== $item->id) {
 					// Soma os valores arredondados dos outros itens.
@@ -75,14 +75,14 @@ final class CouponNum implements Adjuster
 		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity());
 		// Define o valor por unidade com base no desconto ou no preço ajustado.
 		if ($prices->discount == 0) {
-			$this->single_amount = round($prices->price,2); // Sem desconto, usa o preço ajustado.
+			$this->single_amount = round($prices->price, 2); // Sem desconto, usa o preço ajustado.
 		} else {
-			$this->single_amount = round($prices->discount / $this->item->quantity(),2); // Com desconto, calcula o valor por unidade.
+			$this->single_amount = round($prices->discount / $this->item->quantity(), 2); // Com desconto, calcula o valor por unidade.
 		}
 
 		$this->amount = $prices->discount; // Define o valor total do desconto.
 
-		if($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value){
+		if ($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value) {
 			$this->nr_possible_gifts 	= 1;
 			$this->possible_gifts 		= ProductProxy::withoutEvents(function () {
 				return $this->coupon->gifts->pluck('id')->toArray();
@@ -126,13 +126,12 @@ final class CouponNum implements Adjuster
 		return -1 * $this->amount;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::COUPON_PERC_NUM(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
 			'origin' 			=> $this->coupon->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),

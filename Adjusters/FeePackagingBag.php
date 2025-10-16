@@ -16,60 +16,59 @@ use Vanilo\Adjustments\Support\IsNotIncluded;
 
 final class FeePackagingBag implements Adjuster
 {
-    use HasWriteableTitleAndDescription;
-    use IsLockable;
-    use IsNotIncluded;
+	use HasWriteableTitleAndDescription;
+	use IsLockable;
+	use IsNotIncluded;
 	use IsAShippingAdjusment;
 
-    private float $amount;
+	private float $amount;
 
-    public function __construct(float $amount)
-    {
-        $this->amount = $amount;
+	public function __construct(float $amount)
+	{
+		$this->amount = $amount;
 
-        $this->setTitle('backoffice.adjustment.fee_packaging_order_bag');
-    }
+		$this->setTitle('backoffice.adjustment.fee_packaging_order_bag');
+	}
 
-    public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
-    {
-        $data = $adjustment->getData();
+	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
+	{
+		$data = $adjustment->getData();
 
-        return new self(floatval($data['amount'] ?? 0));
-    }
+		return new self(floatval($data['amount'] ?? 0));
+	}
 
-    public function createAdjustment(Adjustable $adjustable): Adjustment
-    {
-        $adjustmentClass = AdjustmentProxy::modelClass();
+	public function createAdjustment(Adjustable $adjustable): Adjustment
+	{
+		$adjustmentClass = AdjustmentProxy::modelClass();
 
-        return new $adjustmentClass($this->getModelAttributes($adjustable));
-    }
+		return new $adjustmentClass($this->getModelAttributes($adjustable));
+	}
 
-    public function recalculate(Adjustment $adjustment, Adjustable $adjustable): Adjustment
-    {
-        $adjustment->setAmount($this->calculateAmount($adjustable));
+	public function recalculate(Adjustment $adjustment, Adjustable $adjustable): Adjustment
+	{
+		$adjustment->setAmount($this->calculateAmount($adjustable));
 
-        return $adjustment;
-    }
+		return $adjustment;
+	}
 
-    private function calculateAmount(Adjustable $adjustable): float
-    {
-        return $this->amount;
-    }
+	private function calculateAmount(Adjustable $adjustable): float
+	{
+		return $this->amount;
+	}
 
-    private function getModelAttributes(Adjustable $adjustable): array
-    {
-        return [
-            'type' 				=> AdjustmentTypeProxy::FEE_PACKAGING_BAG(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-            'adjuster' 			=> self::class,
-            'origin' 			=> null,
-            'title' 			=> $this->getTitle(),
-            'description' 		=> $this->getDescription(),
-            'data' 				=> ['amount' => $this->amount],
-            'amount' 			=> $this->calculateAmount($adjustable),
-            'is_locked' 		=> $this->isLocked(),
-            'is_included' 		=> $this->isIncluded(),
-        ];
-    }
+	public function getModelAttributes(Adjustable $adjustable): array
+	{
+		return [
+			'type' 				=> AdjustmentTypeProxy::FEE_PACKAGING_BAG(),
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
+			'origin' 			=> null,
+			'title' 			=> $this->getTitle(),
+			'description' 		=> $this->getDescription(),
+			'data' 				=> ['amount' => $this->amount],
+			'amount' 			=> $this->calculateAmount($adjustable),
+			'is_locked' 		=> $this->isLocked(),
+			'is_included' 		=> $this->isIncluded(),
+		];
+	}
 }

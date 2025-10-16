@@ -75,13 +75,12 @@ final class DiscountStore implements Adjuster
 		return -1 * $this->amount;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::STORE_DISCOUNT(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
 			'origin' 			=> 'store',
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),

@@ -45,14 +45,14 @@ final class CouponPerc implements Adjuster
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
 
-		if($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value){
+		if ($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value) {
 			$this->nr_possible_gifts 	= 1;
 			$this->possible_gifts 		= ProductProxy::withoutEvents(function () {
 				return $this->coupon->gifts->pluck('id')->toArray();
 			});
 			$this->selected_gifts 		= session('checkout.coupon-selected_gifts', []);
 		}
-		
+
 		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle($this->coupon->name ?? null);
@@ -88,15 +88,14 @@ final class CouponPerc implements Adjuster
 		return -1 * $this->amount;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::COUPON_PERC_NUM(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
+			'adjustable' 		=> $adjustable,
 			'adjuster' 			=> self::class,
 			'origin' 			=> $this->coupon->id,
-			'title' 			=> $this->getTitle(),
+			'title' 			=> $this,
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
 				'single_amount' => Utilities::RoundPrice($this->single_amount),

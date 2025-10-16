@@ -42,21 +42,21 @@ final class ClientCard implements Adjuster
 	{
 		$data = $adjustment->getData();
 
-        return new self(floatval($data['balance'] ?? 0),$data['card'],$data['cart']);
+		return new self(floatval($data['balance'] ?? 0), $data['card'], $data['cart']);
 	}
 
 	public function createAdjustment(Adjustable $adjustable): Adjustment
 	{
 		$adjustmentClass = AdjustmentProxy::modelClass();
 
-        return new $adjustmentClass($this->getModelAttributes($adjustable));
+		return new $adjustmentClass($this->getModelAttributes($adjustable));
 	}
 
 	public function recalculate(Adjustment $adjustment, Adjustable $adjustable): Adjustment
 	{
 		$adjustment->setAmount($this->calculateAmount($adjustable));
 
-        return $adjustment;  
+		return $adjustment;
 	}
 
 	private function calculateAmount(Adjustable $adjustable): float
@@ -74,13 +74,12 @@ final class ClientCard implements Adjuster
 		return -1 * $balance;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::CLIENT_CARD(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
 			'origin' 			=> $this->card->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),

@@ -75,13 +75,12 @@ final class DirectDiscount implements Adjuster
 		return -1 * $this->amount;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::DIRECT_DISCOUNT(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
 			'origin' 			=> $this->product->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),

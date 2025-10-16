@@ -15,14 +15,15 @@ declare(strict_types=1);
 namespace Vanilo\Adjustments\Contracts;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Vanilo\Cart\Helpers\Modifier;
 
 interface Adjustable
 {
     public function itemsTotal(): float;
 
-    public function adjustments(): AdjustmentCollection;
+    public function adjustments(): AdjustmentCollection | ModifierCollection;
 
-    public function adjustmentsRelation(): MorphMany;
+    /* public function adjustmentsRelation(): MorphMany;
 
-    public function recalculateAdjustments(): void;
+    public function recalculateAdjustments(): void; */
 }

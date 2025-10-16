@@ -70,13 +70,12 @@ final class SimpleShippingFee implements Adjuster
 		return $this->amount;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::SHIPPING(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
 			'origin' 			=> $this->shipping->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),

@@ -37,7 +37,7 @@ final class DiscountInterval implements Adjuster
 		$this->interval = $interval;
 
 		$prices = $item->product->calculatePrice($interval->type == 'percentage' ? 'perc' : 'num', $interval->value, $item->getAdjustedPrice());
-		
+
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
 
@@ -74,13 +74,12 @@ final class DiscountInterval implements Adjuster
 		return -1 * $this->amount;
 	}
 
-	private function getModelAttributes(Adjustable $adjustable): array
+	public function getModelAttributes(Adjustable $adjustable): array
 	{
 		return [
 			'type' 				=> AdjustmentTypeProxy::INTERVAL_DISCOUNT(),
-			'adjustable_type' 	=> $adjustable->getMorphClass(),
-			'adjustable_id' 	=> $adjustable->id,
-			'adjuster' 			=> self::class,
+			'adjustable' 		=> $adjustable,
+			'adjuster' 			=> $this,
 			'origin' 			=> 'interval',
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
