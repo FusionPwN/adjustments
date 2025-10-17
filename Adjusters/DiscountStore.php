@@ -43,6 +43,8 @@ final class DiscountStore implements Adjuster
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
 
+		debug("Product [" . $this->item->product->name . "] --- Base price [" . $this->item->getAdjustedPrice() . "] --- Applying STORE DISCOUNT --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
+
 		$this->setTitle('frontoffice.store-discount');
 	}
 
