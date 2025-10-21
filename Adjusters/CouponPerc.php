@@ -93,9 +93,9 @@ final class CouponPerc implements Adjuster
 		return [
 			'type' 				=> AdjustmentTypeProxy::COUPON_PERC_NUM(),
 			'adjustable' 		=> $adjustable,
-			'adjuster' 			=> self::class,
+			'adjuster' 			=> $this,
 			'origin' 			=> $this->coupon->id,
-			'title' 			=> $this,
+			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
 			'data' 				=> [
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
