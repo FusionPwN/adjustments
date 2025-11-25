@@ -166,4 +166,9 @@ class Adjustment extends Model implements AdjustmentContract
         $this->is_locked = false;
         $this->save();
     }
+
+    public function isPromo(): bool
+	{
+		return AdjustmentTypeProxy::IsPromo($this->type);
+	}
 }

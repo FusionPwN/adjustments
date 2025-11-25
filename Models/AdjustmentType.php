@@ -56,6 +56,17 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 		self::COUPON_FREE_PRODUCT,
 	];
 
+	protected static $PROMO = [
+		self::DESCONTO_PERC_EURO,
+		self::OFERTA_PERCENTAGEM,
+		self::OFERTA_BARATO,
+		self::OFERTA_PROD_IGUAL,
+		self::OFERTA_PROD,
+		self::OFERTA_DESC_CARRINHO,
+		self::DIRECT_DISCOUNT,
+		self::STORE_DISCOUNT,
+	];
+
 	# para separar as campanhas
 	protected static $DISCOUNTS = [
 		self::DESCONTO_PERC_EURO,
@@ -142,6 +153,15 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 	public static function IsCoupon(AdjustmentType $type): bool
 	{
 		if (in_array($type->value(), self::$COUPONS)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function IsPromo(AdjustmentType $type): bool
+	{
+		if (in_array($type->value(), self::$PROMO)) {
 			return true;
 		}
 

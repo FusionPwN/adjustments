@@ -160,4 +160,15 @@ class RelationAdjustmentCollection implements AdjustmentCollection
 
 		return $collection->filter(fn(Adjustment $adjustment) => $this->typeFilter->equals($adjustment->type));
 	}
+
+	public function hasPromo(): bool
+	{
+		foreach ($this->getIterator() as $adjustment) {
+			if ($adjustment->isPromo()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

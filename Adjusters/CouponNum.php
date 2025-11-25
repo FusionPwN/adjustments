@@ -74,7 +74,7 @@ final class CouponNum implements Adjuster
 		// Calcula os preços ajustados do produto com base no valor do cupão.
 		$prices = $this->item->product->calculatePrice('num', $value, $this->item->getAdjustedPrice([AdjustmentTypeProxy::COUPON_PERC_NUM()]) * $this->item->quantity());
 		// Define o valor por unidade com base no desconto ou no preço ajustado.
-		if ($prices->discount == 0) {
+		if ($prices->discount == 0 && $value > 0) {
 			$this->single_amount = round($prices->price, 2); // Sem desconto, usa o preço ajustado.
 		} else {
 			$this->single_amount = round($prices->discount / $this->item->quantity(), 2); // Com desconto, calcula o valor por unidade.
