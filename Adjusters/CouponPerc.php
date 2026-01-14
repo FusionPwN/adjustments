@@ -53,7 +53,7 @@ final class CouponPerc implements Adjuster
 			$this->selected_gifts 		= session('checkout.coupon-selected_gifts', []);
 		}
 
-		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
+		#debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle($this->coupon->name ?? null);
 	}

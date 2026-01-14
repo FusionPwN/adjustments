@@ -52,7 +52,7 @@ final class DiscountScalablePercNum implements Adjuster
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
 
-		debug("Product [" . $this->item->product->name . "] --- Base price [$this->price_before] --- Applying discount [$discount->name] VALUE [$this->discount_value] - LEVEL [$this->level + 1] OF [$this->levels] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
+		#debug("Product [" . $this->item->product->name . "] --- Base price [$this->price_before] --- Applying discount [$discount->name] VALUE [$this->discount_value] - LEVEL [$this->level + 1] OF [$this->levels] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle($this->discount->name ?? null);
 	}

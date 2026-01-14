@@ -91,7 +91,7 @@ final class CouponNum implements Adjuster
 		}
 
 		// Registra informações de depuração sobre o cupão aplicado.
-		debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
+		#debug("Product [" . $this->item->product->name . "] --- Applying coupon [$coupon->code] --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle($this->coupon->name ?? null); // Define o título do ajuste com o nome do cupão.
 	}
