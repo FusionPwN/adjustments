@@ -17,6 +17,7 @@ use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
+use Illuminate\Support\Facades\Cache;
 
 final class ClientCard implements Adjuster
 {
@@ -61,17 +62,33 @@ final class ClientCard implements Adjuster
 
 	private function calculateAmount(Adjustable $adjustable): float
 	{
-		$retiredBalnce = $this->cart->total() - $this->balance;
+		$total = max((float) $this->cart->total(), 0);
+		$availableBalance = max((float) $this->balance, 0);
+		$onlyPayProducts = (int) Cache::get('settings.client_card.only_pay_products', 0) === 1;
 
-		$balance = 0;
+		if ($onlyPayProducts) {
+			$shippingAmount = 0;
+			$shippingAdjustment = $this->cart->getShippingAdjustment();
 
-		if (0 >= $retiredBalnce) {
-			$balance = $this->cart->total();
+			if (null !== $shippingAdjustment) {
+				$shippingAmount = (float) ($shippingAdjustment->display_amount ?? $shippingAdjustment->getAmount());
+			}
+
+			$packagingAmount = 0;
+			$packagingAdjustment = $this->cart->getFeePackagingBagAdjustment();
+
+			if (null !== $packagingAdjustment) {
+				$packagingAmount = (float) ($packagingAdjustment->display_amount ?? $packagingAdjustment->getAmount());
+			}
+
+			$mandatoryAmount = max($shippingAmount, 0) + max($packagingAmount, 0);
+			$payableProductsAmount = max($total - $mandatoryAmount, 0);
+			$appliedBalance = min($availableBalance, $payableProductsAmount);
 		} else {
-			$balance = $this->balance;
+			$appliedBalance = min($availableBalance, $total);
 		}
 
-		return -1 * $balance;
+		return -1 * Utilities::RoundPrice($appliedBalance);
 	}
 
 	public function getModelAttributes(Adjustable $adjustable): array
