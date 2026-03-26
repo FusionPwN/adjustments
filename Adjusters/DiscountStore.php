@@ -15,6 +15,7 @@ use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
+use Illuminate\Support\Facades\Cache;
 
 final class DiscountStore implements Adjuster
 {
@@ -34,11 +35,17 @@ final class DiscountStore implements Adjuster
 	{
 		$this->cart = $cart;
 		$this->item = $item;
-		$this->value = $value;
+		$this->value = $this->resolveStoreDiscountValue($value);
 
 		$this->price_before = $item->getAdjustedPrice();
 
-		$prices = $item->product->calculatePrice('perc', $value, $this->price_before);
+		$prices = $item->product->calculatePrice('perc', $this->value, $this->price_before);
+		
+		$maxMnsrmStoreDiscount = $this->getMaxMnsrmStoreDiscount();
+		if ($this->item->product->isMNSRM() && null !== $maxMnsrmStoreDiscount && $prices->discount > $maxMnsrmStoreDiscount) {
+			$prices->discount = min($maxMnsrmStoreDiscount, $prices->price_init);
+			$prices->price = Utilities::RoundPrice($prices->price_init - $prices->discount);
+		}
 
 		$this->single_amount = $prices->discount;
 		$this->amount = $prices->discount * $item->quantity();
@@ -46,6 +53,30 @@ final class DiscountStore implements Adjuster
 		debug("Product [" . $this->item->product->name . "] --- Base price [" . $this->item->getAdjustedPrice() . "] --- Applying STORE DISCOUNT --- Value per unit [$this->single_amount] --- Final applied value [$this->amount]");
 
 		$this->setTitle('frontoffice.store-discount');
+	}
+	
+	private function resolveStoreDiscountValue(float $fallbackValue): float
+	{
+		if ($this->item->product->isMSRM()) {
+			return 0;
+		}
+
+		if ($this->item->product->isMNSRM()) {
+			return (float) Cache::get('settings.store_discount_mnsrm', $fallbackValue);
+		}
+
+		return $fallbackValue;
+	}
+
+	private function getMaxMnsrmStoreDiscount(): ?float
+	{
+		$value = Cache::get('settings.max_store_discount_mnsrm');
+
+		if (null === $value || '' === $value) {
+			return null;
+		}
+
+		return (float) $value;
 	}
 
 	public static function reproduceFromAdjustment(Adjustment $adjustment): Adjuster
