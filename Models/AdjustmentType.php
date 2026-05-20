@@ -47,6 +47,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 	public const FEE_PACKAGING_BAG 		= 'fee_packaging_bag';
 	public const PAYMENT_FEE 			= 'payment_fee';
 	public const FREEBIE_OFFER 			= 'freebie_offer';
+	public const BUNDLE_DISCOUNT 		= 'bundle_discount';
 
 	# para separar os produtos de oferta nas listagens do checkout e backoffice
 	protected static $VISUAL_SEPARATORS = [
@@ -65,6 +66,7 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 		self::OFERTA_DESC_CARRINHO,
 		self::DIRECT_DISCOUNT,
 		self::STORE_DISCOUNT,
+		self::BUNDLE_DISCOUNT
 	];
 
 	# para separar as campanhas
