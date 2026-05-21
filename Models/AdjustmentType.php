@@ -116,7 +116,8 @@ class AdjustmentType extends Enum implements AdjustmentTypeContract
 			self::CLIENT_CARD 			=> __('backoffice.adjustment.client_card'),
 			self::FEE_PACKAGING_BAG 	=> __('backoffice.adjustment.fee_packaging_order_bag'),
 			self::PAYMENT_FEE 			=> __('backoffice.adjustment.payment_fee'),
-			self::FREEBIE_OFFER 		=> __('backoffice.adjustment.freebie_offer')
+			self::FREEBIE_OFFER 		=> __('backoffice.adjustment.freebie_offer'),
+			self::BUNDLE_DISCOUNT 		=> __('backoffice.adjustment.bundle_discount')
 		];
 	}
 
