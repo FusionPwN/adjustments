@@ -13,6 +13,7 @@ use Vanilo\Adjustments\Contracts\Adjuster;
 use Vanilo\Adjustments\Contracts\Adjustment;
 use Vanilo\Adjustments\Models\AdjustmentProxy;
 use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
+use Vanilo\Adjustments\Support\ExtraData;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
@@ -23,13 +24,14 @@ final class CouponPerc implements Adjuster
 	use HasWriteableTitleAndDescription;
 	use IsLockable;
 	use IsNotIncluded;
+	use ExtraData;
 
 	private mixed $cart;
 	private $item;
 	private Coupon $coupon;
 
-	private float $single_amount;
-	private float $amount;
+	private float $single_amount = 0;
+	private float $amount = 0;
 
 	private float $nr_possible_gifts = 0;
 	private array $possible_gifts = [];
@@ -41,9 +43,22 @@ final class CouponPerc implements Adjuster
 		$this->item = $item;
 		$this->coupon = $coupon;
 
-		$prices = $this->item->product->calculatePrice('perc', $coupon->value, $this->item->getAdjustedPrice());
-		$this->single_amount = $prices->discount;
-		$this->amount = $prices->discount * $item->quantity();
+		if ($this->item->product->isBundleProduct()) {
+			foreach ($item->product->bundleItems as $bundleItem) {
+				$price = $bundleItem->product->calculatePrice($bundleItem->discount_type == 'percentage' ? 'perc' : 'num', (float) $bundleItem->discount_value, $bundleItem->product->getPriceVat());
+				$prices = $this->item->product->calculatePrice('perc', $coupon->value, $price->price);
+
+				$this->single_amount += $prices->discount;
+				$this->amount += $prices->discount * $item->quantity();
+			}
+		} else {
+			$prices = $this->item->product->calculatePrice('perc', $coupon->value, $this->item->getAdjustedPrice());
+
+			$this->single_amount = $prices->discount;
+			$this->amount = $prices->discount * $item->quantity();
+		}
+
+		$this->addExtraData('bundle', $item, $coupon);
 
 		if ($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value) {
 			$this->nr_possible_gifts 	= 1;
@@ -97,14 +112,14 @@ final class CouponPerc implements Adjuster
 			'origin' 			=> $this->coupon->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
-			'data' 				=> [
+			'data' 				=> array_merge([
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
 				'amount' 		=> Utilities::RoundPrice($this->amount),
 				'type' 			=> 'perc',
 				'nr_possible_gifts' => $this->nr_possible_gifts,
 				'possible_gifts' 	=> $this->possible_gifts,
 				'selected_gifts' 	=> $this->selected_gifts
-			],
+			], $this->extra_data),
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
 			'is_included' 		=> $this->isIncluded(),

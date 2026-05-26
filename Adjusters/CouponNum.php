@@ -13,6 +13,7 @@ use Vanilo\Adjustments\Contracts\Adjuster;
 use Vanilo\Adjustments\Contracts\Adjustment;
 use Vanilo\Adjustments\Models\AdjustmentProxy;
 use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
+use Vanilo\Adjustments\Support\ExtraData;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
@@ -23,6 +24,7 @@ final class CouponNum implements Adjuster
 	use HasWriteableTitleAndDescription;
 	use IsLockable;
 	use IsNotIncluded;
+	use ExtraData;
 
 	private mixed $cart;
 	private $item;
@@ -82,6 +84,8 @@ final class CouponNum implements Adjuster
 
 		$this->amount = $prices->discount; // Define o valor total do desconto.
 
+		$this->addExtraData('bundle', $item, $coupon);
+
 		if ($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value) {
 			$this->nr_possible_gifts 	= 1;
 			$this->possible_gifts 		= ProductProxy::withoutEvents(function () {
@@ -135,14 +139,14 @@ final class CouponNum implements Adjuster
 			'origin' 			=> $this->coupon->id,
 			'title' 			=> $this->getTitle(),
 			'description' 		=> $this->getDescription(),
-			'data' 				=> [
+			'data' 				=> array_merge([
 				'single_amount' => Utilities::RoundPrice($this->single_amount),
 				'amount' 		=> Utilities::RoundPrice($this->amount),
 				'type' 			=> 'num',
 				'nr_possible_gifts' => $this->nr_possible_gifts,
 				'possible_gifts' 	=> $this->possible_gifts,
 				'selected_gifts' 	=> $this->selected_gifts
-			],
+			], $this->extra_data),
 			'amount' 			=> $this->calculateAmount($adjustable),
 			'is_locked' 		=> $this->isLocked(),
 			'is_included' 		=> $this->isIncluded(),
