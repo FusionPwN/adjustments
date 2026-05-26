@@ -48,8 +48,8 @@ final class CouponPerc implements Adjuster
 				$price = $bundleItem->product->calculatePrice($bundleItem->discount_type == 'percentage' ? 'perc' : 'num', (float) $bundleItem->discount_value, $bundleItem->product->getPriceVat());
 				$prices = $this->item->product->calculatePrice('perc', $coupon->value, $price->price);
 
-				$this->single_amount += $prices->discount;
-				$this->amount += $prices->discount * $item->quantity();
+				$this->single_amount += $prices->discount * $bundleItem->quantity;
+				$this->amount += ($prices->discount * $bundleItem->quantity) * $item->quantity();
 			}
 		} else {
 			$prices = $this->item->product->calculatePrice('perc', $coupon->value, $this->item->getAdjustedPrice());
@@ -59,6 +59,8 @@ final class CouponPerc implements Adjuster
 		}
 
 		$this->addExtraData('bundle', $item, $coupon);
+
+		#dd($this->extra_data);
 
 		if ($this->coupon->offers_products == 1 && $cart->itemsTotal() > $this->coupon->offer_product_min_purchase_value) {
 			$this->nr_possible_gifts 	= 1;

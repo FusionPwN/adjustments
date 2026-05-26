@@ -20,12 +20,13 @@ trait ExtraData
 
             foreach ($item->product->bundleItems as $bundleItem) {
                 $bundlePrice = $bundleItem->product->calculatePrice($bundleItem->discount_type == 'percentage' ? 'perc' : 'num', (float) $bundleItem->discount_value, $bundleItem->product->getPriceVat());
+                $bundleLinePrice = $bundlePrice->price;
 
                 $bundleItems[] = [
                     'item' => $bundleItem,
-                    'price' => $bundlePrice->price,
+                    'price' => $bundleLinePrice,
                 ];
-                $bundleTotal += $bundlePrice->price;
+                $bundleTotal += $bundleLinePrice;
             }
 
             $remainingValue = round((float) $discount->value, 2);
@@ -50,7 +51,9 @@ trait ExtraData
 
                 $this->extra_data['bundle_items'][] = [
                     'product_id'        => $bundleItem->product_id,
-                    'discount_amount'   => $bundleItemPrice->discount * $item->quantity(),
+                    'prices'            => $bundleItemPrice,
+                    'quantity'          => $bundleItem->quantity,
+                    'discount_amount'   => $bundleItemPrice->discount,
                 ];
             }
         }

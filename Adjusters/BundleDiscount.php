@@ -47,8 +47,8 @@ final class BundleDiscount implements Adjuster
 				$bundleItem->product->getPriceVat()
 			);
 
-			$this->single_amount += $prices->discount;
-			$this->amount += $prices->discount * $this->item->quantity();
+			$this->single_amount += $prices->discount * $bundleItem->quantity;
+			$this->amount += ($prices->discount * $bundleItem->quantity) * $this->item->quantity();
 
 			$this->bundleConfig[] = [
 				'id' => $bundleItem->id,
