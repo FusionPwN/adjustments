@@ -39,7 +39,7 @@ final class DiscountFree implements Adjuster
 		$this->discount 			= $discount;
 		$this->nr_possible_gifts 	= $nr_possible_gifts;
 		$this->possible_gifts 		= $discount->properties->refs;
-		$this->selected_gifts 		= session('checkout.selected_gifts', []);
+		$this->selected_gifts 		= session('checkout.' . strtolower(class_basename($this)) . '-' . $this->discount->id . '.selected_gifts', []);
 
 		$this->setTitle($this->discount->name ?? null);
 	}
