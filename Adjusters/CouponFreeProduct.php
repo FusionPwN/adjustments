@@ -41,7 +41,7 @@ final class CouponFreeProduct implements Adjuster
 		$this->possible_gifts 		= ProductProxy::withoutEvents(function () {
 			return $this->coupon->gifts->pluck('id')->toArray();
 		});
-		$this->selected_gifts 		= session('checkout.' . strtolower(class_basename($this)) . '-' . $this->coupon->id . '.selected_gifts', []);
+		$this->selected_gifts 		= session('checkout.' . strtolower($this->coupon->type->value()) . '-' . $this->coupon->id . '.selected_gifts', []);
 
 		$this->setTitle($this->coupon->name ?? null);
 	}
