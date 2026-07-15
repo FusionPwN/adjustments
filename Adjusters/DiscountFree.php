@@ -16,6 +16,7 @@ use Vanilo\Adjustments\Models\AdjustmentTypeProxy;
 use Vanilo\Adjustments\Support\HasWriteableTitleAndDescription;
 use Vanilo\Adjustments\Support\IsLockable;
 use Vanilo\Adjustments\Support\IsNotIncluded;
+use Vanilo\Product\Models\ProductProxy;
 
 final class DiscountFree implements Adjuster
 {
@@ -39,7 +40,16 @@ final class DiscountFree implements Adjuster
 		$this->discount 			= $discount;
 		$this->nr_possible_gifts 	= $nr_possible_gifts;
 		$this->possible_gifts 		= $discount->properties->refs;
-		$this->selected_gifts 		= session('checkout.' . strtolower(class_basename($this)) . '-' . $this->discount->id . '.selected_gifts', []);
+		$this->selected_gifts 		= session('checkout.gifts.' . strtolower(class_basename($this)) . '-' . $this->discount->id . '.selected_gifts', []);
+
+		foreach ($this->selected_gifts as $selected_gift) {
+			$product = ProductProxy::find($selected_gift);
+			if ($product) {
+				$price = $product->getPriceVat();
+				$this->single_amount += $price;
+				$this->amount += $price;
+			}
+		}
 
 		$this->setTitle($this->discount->name ?? null);
 	}

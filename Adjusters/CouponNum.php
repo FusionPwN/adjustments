@@ -91,7 +91,16 @@ final class CouponNum implements Adjuster
 			$this->possible_gifts 		= ProductProxy::withoutEvents(function () {
 				return $this->coupon->gifts->pluck('id')->toArray();
 			});
-			$this->selected_gifts 		= session('checkout.coupon-selected_gifts', []);
+			$this->selected_gifts 		= session('checkout.gifts.' . strtolower($this->coupon->type->value()) . '-' . $this->coupon->id . '.selected_gifts', []);
+
+			foreach ($this->selected_gifts as $selected_gift) {
+				$product = ProductProxy::find($selected_gift);
+				if ($product) {
+					$price = $product->getPriceVat();
+					$this->single_amount += $price;
+					$this->amount += $price;
+				}
+			}
 		}
 
 		// Registra informações de depuração sobre o cupão aplicado.
