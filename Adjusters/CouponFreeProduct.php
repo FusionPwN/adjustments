@@ -43,15 +43,6 @@ final class CouponFreeProduct implements Adjuster
 		});
 		$this->selected_gifts 		= session('checkout.gifts.' . strtolower($this->coupon->type->value()) . '-' . $this->coupon->id . '.selected_gifts', []);
 
-		foreach ($this->selected_gifts as $selected_gift) {
-			$product = ProductProxy::find($selected_gift);
-			if ($product) {
-				$price = $product->getPriceVat();
-				$this->single_amount += $price;
-				$this->amount += $price;
-			}
-		}
-
 		$this->setTitle($this->coupon->name ?? null);
 	}
 

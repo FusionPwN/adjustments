@@ -42,15 +42,6 @@ final class DiscountFree implements Adjuster
 		$this->possible_gifts 		= $discount->properties->refs;
 		$this->selected_gifts 		= session('checkout.gifts.' . strtolower(class_basename($this)) . '-' . $this->discount->id . '.selected_gifts', []);
 
-		foreach ($this->selected_gifts as $selected_gift) {
-			$product = ProductProxy::find($selected_gift);
-			if ($product) {
-				$price = $product->getPriceVat();
-				$this->single_amount += $price;
-				$this->amount += $price;
-			}
-		}
-
 		$this->setTitle($this->discount->name ?? null);
 	}
 
